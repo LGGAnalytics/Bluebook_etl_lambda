@@ -29,18 +29,18 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t cmg_web_lambda .
+          docker build -t bluebook_etl_lambda .
         # Builds the Docker image with the tag 'cmg_web_lambda' using the Dockerfile in the repository.
 
       - name: Create ECR repo if it does not exist
         run: |
-          aws ecr describe-repositories --repository-names cmg_web_lambda || \
-          aws ecr create-repository --repository-name cmg_web_lambda
+          aws ecr describe-repositories --repository-names bluebook_etl_lambda || \
+          aws ecr create-repository --repository-name bluebook_etl_lambda
         # Checks if the ECR repository 'cmg_web_lambda' exists; if not, it creates the repository.
 
       - name: Tag and push image to Amazon ECR
         run: |
-          ECR_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/cmg_web_lambda"
+          ECR_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bluebook_etl_lambda"
           GIT_SHA="${{ github.sha }}"
           
           # Tag with both 'latest' and Git commit SHA
@@ -56,7 +56,7 @@ jobs:
       - name: Create or update Lambda
         run: |
           FUNCTION_NAME="cmg_web_lambda"
-          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/cmg_web_lambda:latest"
+          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bluebook_etl_lambda:latest"
           aws lambda get-function --function-name $FUNCTION_NAME || \
           aws lambda create-function \
             --function-name $FUNCTION_NAME \
