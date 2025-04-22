@@ -1,0 +1,70 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    # Trigger the workflow on pushes to the main branch.
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # Use the latest Ubuntu environment for the job.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        # This step checks out the repository code so that the workflow can access it.
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+        # Configures AWS credentials using secrets, allowing subsequent steps to interact with AWS services.
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        # Logs into Amazon Elastic Container Registry (ECR) to prepare for pushing Docker images.
+
+      - name: Build Docker image
+        run: |
+          docker build -t cmg_web_lambda .
+        # Builds the Docker image with the tag 'cmg_web_lambda' using the Dockerfile in the repository.
+
+      - name: Create ECR repo if it does not exist
+        run: |
+          aws ecr describe-repositories --repository-names cmg_web_lambda || \
+          aws ecr create-repository --repository-name cmg_web_lambda
+        # Checks if the ECR repository 'cmg_web_lambda' exists; if not, it creates the repository.
+
+      - name: Tag and push image to Amazon ECR
+        run: |
+          ECR_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/cmg_web_lambda"
+          GIT_SHA="${{ github.sha }}"
+          
+          # Tag with both 'latest' and Git commit SHA
+          docker tag cmg_web_lambda:latest "$ECR_URI:latest"
+          docker tag cmg_web_lambda:latest "$ECR_URI:$GIT_SHA"
+          
+          # Push both tags
+          docker push "$ECR_URI:latest"
+          docker push "$ECR_URI:$GIT_SHA"
+      
+        # Tags the Docker image with the ECR repository URI and pushes the image to Amazon ECR.
+
+      - name: Create or update Lambda
+        run: |
+          FUNCTION_NAME="cmg_web_lambda"
+          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/cmg_web_lambda:latest"
+          aws lambda get-function --function-name $FUNCTION_NAME || \
+          aws lambda create-function \
+            --function-name $FUNCTION_NAME \
+            --role ${{ secrets.LAMBDA_ROLE_ARN }} \
+            --package-type Image \
+            --code ImageUri=$IMAGE_URI
+          aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --image-uri $IMAGE_URI
+        # Checks if the Lambda function 'cmg_web_lambda' exists; if not, it creates the function.
+        # Updates the Lambda function to use the latest Docker image from ECR.
