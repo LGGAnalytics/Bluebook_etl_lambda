@@ -44,8 +44,8 @@ jobs:
           GIT_SHA="${{ github.sha }}"
           
           # Tag with both 'latest' and Git commit SHA
-          docker tag cmg_web_lambda:latest "$ECR_URI:latest"
-          docker tag cmg_web_lambda:latest "$ECR_URI:$GIT_SHA"
+          docker tag bluebook_etl_lambda:latest "$ECR_URI:latest"
+          docker tag bluebook_etl_lambda:latest "$ECR_URI:$GIT_SHA"
           
           # Push both tags
           docker push "$ECR_URI:latest"
@@ -55,7 +55,7 @@ jobs:
 
       - name: Create or update Lambda
         run: |
-          FUNCTION_NAME="cmg_web_lambda"
+          FUNCTION_NAME="bluebook_etl_lambda"
           IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bluebook_etl_lambda:latest"
           aws lambda get-function --function-name $FUNCTION_NAME || \
           aws lambda create-function \
