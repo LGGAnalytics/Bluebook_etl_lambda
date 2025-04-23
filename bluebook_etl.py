@@ -81,7 +81,7 @@ class ETL_Bluebook():
                 summary_overshort_amount VARCHAR(28)
         );
         """)
-
+        print('Created temporary table CMGSOAR.update_data')
         # self.df.to_csv('consolidate_bb.csv')
 
         # Step 2: Load data into temporary table
@@ -93,7 +93,7 @@ class ETL_Bluebook():
 
         sql = f"""INSERT INTO CMGSOAR.update_data ({columns2}) VALUES ({placeholders})"""
         self.cursor.executemany(sql, values)
-
+        print('Inserted values into update_data')
         self.cursor.execute("""
             UPDATE CMGSOAR.store_summary AS target
             JOIN CMGSOAR.update_data AS upd
@@ -105,10 +105,11 @@ class ETL_Bluebook():
                 target.summary_tktcount_ontime = upd.summary_tktcount_ontime,
                 target.summary_overshort_amount = upd.summary_overshort_amount;
         """)
-
+        print('Updated CMGSOAR.store_summary') 
         self.cursor.execute("""
             DROP TABLE CMGSOAR.update_data;
         """)
+        print('Deleted temporary table CMGSOAR.update_data')
 
         # Commit and close
         self.conn.commit()
