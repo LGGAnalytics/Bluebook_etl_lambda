@@ -57,7 +57,7 @@ def run_bluebook_menu():
     try:
         print('Starting download')
         download_directory(access_token, site_id, remote_path, local_directory)
-        print(f'Downloaded file to {remote_path}')
+        print(f'Downloaded file to {local_directory}')
         downloaded = True
     
     except Exception as e:
