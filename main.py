@@ -13,6 +13,20 @@ import requests
 import glob
 from bluebook_etl import ETL_Bluebook
 
+HOST = os.getenv("HOST")
+DBUSER = os.getenv("DBUSER")
+DBNAME = os.getenv("DBNAME")
+PASSWORD = os.getenv("PASSWORD")
+
+conn = mysql.connector.connect(
+    user=DBUSER,
+    password=PASSWORD,
+    host=HOST,
+    database=DBNAME
+)
+
+cursor = conn.cursor()
+
 def run_bluebook_menu():
     # ------------- Loadings vars
     env_vars = load_env_vars()
@@ -52,14 +66,14 @@ def run_bluebook_menu():
         try:
             print('Running main function')
 
-            conn = mysql.connector.connect(
-                user=env_vars.DBUSER,
-                password=env_vars.PASSWORD,
-                host=env_vars.HOST,
-                database=env_vars.DBNAME
-            )
+            #conn = mysql.connector.connect(
+            #    user=env_vars.DBUSER,
+            #    password=env_vars.PASSWORD,
+            #    host=env_vars.HOST,
+            #    database=env_vars.DBNAME
+            #)
 
-            cursor = conn.cursor()
+            #cursor = conn.cursor()
 
             run_func(conn, cursor).run()
 
