@@ -29,6 +29,7 @@ cursor = conn.cursor()
 
 def run_bluebook_menu():
     # ------------- Loadings vars
+    print('Loading vars')
     env_vars = load_env_vars()
     access_token = get_access_token(env_vars)
     site_id = get_site_id(access_token, env_vars["site_name"])
@@ -44,6 +45,7 @@ def run_bluebook_menu():
     bluebook_path = os.path.join(base_path, bluebook_folder)
     bluebook_path = os.path.normpath(bluebook_path)
 
+    print(f'File path {bluebook_path}')
     directory_path = remote_path = bluebook_path
 
     # ----------------- DOWNLOADING
@@ -55,7 +57,7 @@ def run_bluebook_menu():
     try:
         print('Starting download')
         download_directory(access_token, site_id, remote_path, local_directory)
-        print('Downloaded')
+        print(f'Downloaded file to {remote_path}')
         downloaded = True
     
     except Exception as e:
