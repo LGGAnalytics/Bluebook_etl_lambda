@@ -87,7 +87,7 @@ def run_bluebook_menu():
     # removing the files from the folders locally
 
     if os.path.exists(env_vars['LOCAL_DIRECTORY']):
-        delete_files_in_directory(env_vars['local_directory'])
+        delete_files_in_directory(env_vars['LOCAL_DIRECTORY'])
         print(f"Directory {env_vars['LOCAL_DIRECTORY']} deleted")
     else:
         print(f"Directory {env_vars['LOCAL_DIRECTORY']} does not exist to delete files.")
