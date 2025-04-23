@@ -1,6 +1,6 @@
 import pandas as pd
 import mysql.connector
-import env
+# import env
 import numpy as np
 import re
 import time
@@ -9,7 +9,6 @@ from sharepointetl import load_env_vars, get_access_token, get_site_id, download
 import pandas as pd
 import warnings
 from datetime import datetime, timedelta
-import env
 import requests
 import glob
 from bluebook_etl import ETL_Bluebook
