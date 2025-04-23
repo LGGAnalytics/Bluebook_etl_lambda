@@ -29,7 +29,8 @@ class ETL_Bluebook():
     def extract(self):
         print('Starting extract')
         # df = pd.read_excel('/Users/felipesilverio/Documents/GitHub/miscellanious/BlueBook_OSonic_TEMP.xlsx', header=4)
-        excel_files = glob.glob('tmp/downloaded_files/*.xlsx')
+        print(f'Extracting {glob.glob('/tmp/downloaded_files/*.xlsx')})
+        excel_files = glob.glob('/tmp/downloaded_files/*.xlsx')
         df = pd.read_excel(excel_files[0], header=4)
 
         df.columns = self.cols
