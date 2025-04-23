@@ -34,7 +34,7 @@ def run_bluebook_menu():
 
     # ----------------- DOWNLOADING
     print('Starting Function')
-    local_directory = env_vars['local_directory']
+    local_directory = env_vars['LOCAL_DIRECTORY']
     print(f'Loaded directory {local_directory}')
 
     downloaded = False
@@ -70,10 +70,10 @@ def run_bluebook_menu():
 
     # removing the files from the folders locally
 
-    if os.path.exists(env_vars['local_directory']):
+    if os.path.exists(env_vars['LOCAL_DIRECTORY']):
         delete_files_in_directory(env_vars['local_directory'])
-        print(f"Directory {env_vars['local_directory']} deleted")
+        print(f"Directory {env_vars['LOCAL_DIRECTORY']} deleted")
     else:
-        print(f"Directory {env_vars['local_directory']} does not exist to delete files.")
+        print(f"Directory {env_vars['LOCAL_DIRECTORY']} does not exist to delete files.")
 
     
