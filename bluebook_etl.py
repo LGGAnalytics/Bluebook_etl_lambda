@@ -85,8 +85,12 @@ class ETL_Bluebook():
         # self.df.to_csv('consolidate_bb.csv')
 
         # Step 2: Load data into temporary table
+        # Convert datetime columns to strings
+        for col in df.columns:
+            if pd.api.types.is_datetime64_any_dtype(df[col]):
+                df[col] = df[col].astype(str)
+                
         values = df.values.tolist()
-
         values = [[None if isinstance(val, float) and np.isnan(val) else val for val in row] for row in values]
         columns2 = ', '.join(df.columns)
         placeholders = ', '.join(['%s'] * len(df.columns))
