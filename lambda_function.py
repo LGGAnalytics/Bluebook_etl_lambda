@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from main import run_bluebook_menu
+#from main import run_bluebook_menu
 from extract_from_sonicPortal import run_scraping
 
 logger = logging.getLogger()
