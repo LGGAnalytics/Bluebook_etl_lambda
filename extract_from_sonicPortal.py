@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutException
 import env
+import sharepointetl as sh
 
 username = env.SONIC_USERNAME
 company = env.SONIC_COMPANY
@@ -26,8 +27,15 @@ if not username or not company or not password:
 ###########################################################
 ###########################################################
 
-download_dir = os.path.abspath("C:/Users/AzizAbbaszade/Documents/ETL")
-os.makedirs(download_dir, exist_ok=True)
+# 1. Creating local directory
+env_vars = sh.load_env_vars()
+
+try:
+    os.makedirs(env_vars['LOCAL_DIRECTORY'], exist_ok=True)  # Create the directory if it doesn't exist
+    download_dir = os.path.abspath(env_vars['LOCAL_DIRECTORY'])
+except OSError as e:
+    print(f"Error creating directory {env_vars['LOCAL_DIRECTORY']}: {e}")
+
 
 options = uc.ChromeOptions()
 options.add_argument("--start-maximized")
@@ -116,7 +124,7 @@ def select_last_7_days():
     print("'Last 7 Days' selected and report run.")
     wait_for_loading_complete()
 
-def download_excel(driver, folder, timeout=180):
+def download_excel(driver, folder, timeout=300):
     print("Attempting to download Excel file...")
     driver.switch_to.default_content()
     WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "myPage")))
@@ -160,56 +168,59 @@ def download_excel(driver, folder, timeout=180):
     driver.switch_to.window(original_windows[0])
     print("Switched back to main window after download.")
 
+def run_scraping():
+    # Start process
+    print("Starting automation script...")
 
-# Start process
-print("Starting automation script...")
+    if not login():
+        driver.quit()
+        raise Exception("Login failed.")
 
-if not login():
+    print("Navigating to REPORTING > More Reports")
+    driver.switch_to.default_content()
+    WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "sideMenu")))
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//h3[text()="REPORTING"]'))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.LINK_TEXT, "More Reports..."))).click()
+
+    print("Opening Blue Book report...")
+    driver.switch_to.default_content()
+    WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "myPage")))
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//h2[text()="Summary"]'))).click()
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//a[contains(text(), "Blue Book")]'))).click()
+
+    print("Checking for 'Next' or 'Run Report' button...")
+    driver.switch_to.default_content()
+    WebDriverWait(driver, 15).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "myPage")))
+    try:
+        next_btn = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "next")))
+        driver.execute_script("arguments[0].click();", next_btn)
+        print("'Next' button clicked.")
+    except:
+        print("No 'Next' button found or clickable.")
+
+    try:
+        run_btn = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "next")))
+        if run_btn.text.strip().lower() == "run report":
+            driver.execute_script("arguments[0].click();", run_btn)
+            print("'Run Report' button clicked.")
+            wait_for_loading_complete()
+    except:
+        print("No 'Run Report' button or error clicking.")
+
+    try:
+        select_last_7_days()
+    except Exception as e:
+        print(f"Error selecting last 7 days: {e}")
+
+    try:
+        download_excel(driver, download_dir)
+    except Exception as e:
+        print(f"Error during Excel download: {e}")
+
+    print("Process completed. Waiting before closing browser...")
+    time.sleep(5)
     driver.quit()
-    raise Exception("Login failed.")
-
-print("Navigating to REPORTING > More Reports")
-driver.switch_to.default_content()
-WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "sideMenu")))
-WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//h3[text()="REPORTING"]'))).click()
-WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.LINK_TEXT, "More Reports..."))).click()
-
-print("Opening Blue Book report...")
-driver.switch_to.default_content()
-WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "myPage")))
-WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//h2[text()="Summary"]'))).click()
-WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//a[contains(text(), "Blue Book")]'))).click()
-
-print("Checking for 'Next' or 'Run Report' button...")
-driver.switch_to.default_content()
-WebDriverWait(driver, 15).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "myPage")))
-try:
-    next_btn = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "next")))
-    driver.execute_script("arguments[0].click();", next_btn)
-    print("'Next' button clicked.")
-except:
-    print("No 'Next' button found or clickable.")
-
-try:
-    run_btn = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "next")))
-    if run_btn.text.strip().lower() == "run report":
-        driver.execute_script("arguments[0].click();", run_btn)
-        print("'Run Report' button clicked.")
-        wait_for_loading_complete()
-except:
-    print("No 'Run Report' button or error clicking.")
-
-try:
-    select_last_7_days()
-except Exception as e:
-    print(f"Error selecting last 7 days: {e}")
-
-try:
-    download_excel(driver, download_dir)
-except Exception as e:
-    print(f"Error during Excel download: {e}")
-
-print("Process completed. Waiting before closing browser...")
-time.sleep(5)
-driver.quit()
-print("Browser closed. Script finished.")
+    print("Browser closed. Script finished.")
+    sh.insert_file_into_new(env_vars['LOCAL_DIRECTORY'], os.path.join(env_vars['base_path'],'new'))
+    print("Moved downloaded file to sharepoint")
+    print("Finished scraping process")
