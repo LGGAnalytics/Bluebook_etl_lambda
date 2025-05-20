@@ -1,5 +1,6 @@
 import requests
 import os
+import shutil
 # import env
 # from dotenv import load_dotenv
 
@@ -11,7 +12,7 @@ def load_env_vars():
         "client_id": os.getenv("CLIENT_ID"),
         "client_secret": os.getenv("CLIENT_SECRET"),
         "site_name": os.getenv("SITE_NAME"),
-        "directory_path": os.getenv("DIRECTORY_PATH"),
+        # "directory_path": os.getenv("DIRECTORY_PATH"),
         "base_path": os.getenv("BASE_PATH"),
         "HOST": os.getenv("HOST"),
         "DBNAME": os.getenv("DBNAME"),
@@ -107,3 +108,25 @@ def delete_files_in_directory(directory):
             os.remove(file_path)
         except OSError as e:
             pass
+
+def insert_file_into_new(source_file_path, destination_path):
+    """
+    Copies the file at `source_file_path` into BASE_PATH + '/new' as `new_file_name`.
+    If `new_file_name` is not provided, the source file's basename is used.
+    """
+    target_dir = destination_path
+    os.makedirs(target_dir, exist_ok=True)
+
+    file_name = 'BlueBook_OSonic_TEMP.xlsx'
+    destination_path = os.path.join(target_dir, file_name)
+
+    source_file_path = os.path.join(source_file_path, file_name)
+
+    try:
+        shutil.copy2(source_file_path, destination_path)
+        print(f"File copied to: {destination_path}")
+    except Exception as e:
+        print(f"Failed to insert file: {e}")
+        raise
+
+    return print('Succesfully copied blubebook to sharepoint')

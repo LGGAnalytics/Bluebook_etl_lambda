@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import UnexpectedAlertPresentException, TimeoutException
 import env
+import sharepointetl as sh
 
 username = env.SONIC_USERNAME
 company = env.SONIC_COMPANY
@@ -26,8 +27,15 @@ if not username or not company or not password:
 ###########################################################
 ###########################################################
 
-download_dir = os.path.abspath("C:/Users/AzizAbbaszade/Documents/ETL")
-os.makedirs(download_dir, exist_ok=True)
+# 1. Creating local directory
+env_vars = sh.load_env_vars()
+
+try:
+    os.makedirs(env_vars['LOCAL_DIRECTORY'], exist_ok=True)  # Create the directory if it doesn't exist
+    download_dir = os.path.abspath(env_vars['LOCAL_DIRECTORY'])
+except OSError as e:
+    print(f"Error creating directory {env_vars['LOCAL_DIRECTORY']}: {e}")
+
 
 options = uc.ChromeOptions()
 options.add_argument("--start-maximized")
@@ -116,7 +124,7 @@ def select_last_7_days():
     print("'Last 7 Days' selected and report run.")
     wait_for_loading_complete()
 
-def download_excel(driver, folder, timeout=180):
+def download_excel(driver, folder, timeout=300):
     print("Attempting to download Excel file...")
     driver.switch_to.default_content()
     WebDriverWait(driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, "myPage")))
@@ -213,3 +221,5 @@ print("Process completed. Waiting before closing browser...")
 time.sleep(5)
 driver.quit()
 print("Browser closed. Script finished.")
+sh.insert_file_into_new(env_vars['LOCAL_DIRECTORY'], os.path.join(env_vars['base_path'],'new'))
+print("Moved downloaded file to sharepoint")
