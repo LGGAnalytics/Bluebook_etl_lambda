@@ -1,7 +1,7 @@
 import os
 import time
 import datetime
-import chromedriver_binary_auto
+import chromedriver_binary
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
