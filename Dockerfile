@@ -18,3 +18,4 @@ COPY . .
 
 # Define the command to run the main script
 CMD [ "lambda_function.lambda_handler" ]
+

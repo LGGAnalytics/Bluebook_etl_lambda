@@ -125,3 +125,4 @@ class ETL_Bluebook():
         self.extract()
         self.transform()
         self.load()
+

@@ -213,3 +213,4 @@ print("Process completed. Waiting before closing browser...")
 time.sleep(5)
 driver.quit()
 print("Browser closed. Script finished.")
+
