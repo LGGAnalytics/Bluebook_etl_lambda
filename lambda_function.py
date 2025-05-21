@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
-#from main import run_bluebook_menu
-from extract_from_sonicPortal import run_scraping
+from main import run_bluebook_menu
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -29,10 +28,8 @@ def lambda_handler(event, context):
         }
     
     try:
-        logger.info("Starting scraping process...")
-        run_scraping()
         logger.info("Starting menu ETL process...")
-        #run_bluebook_menu()
+        run_bluebook_menu()
         
         logger.info("Blubebook ETL process complete.")
         return {

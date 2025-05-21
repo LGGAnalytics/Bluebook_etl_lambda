@@ -1,15 +1,20 @@
 FROM public.ecr.aws/lambda/python:3.11
 
-# Set working directory
+
+# # Install Bash and other utilities
+# RUN yum update -y && yum install -y bash
+
+# Set the working directory
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-# Install Python dependencies
 RUN pip install --upgrade pip
+
+# Copy and install dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Copy all code
+# Copy all project files
 COPY . .
 
-# Set Lambda handler
-CMD ["lambda_function.lambda_handler"]
+# Define the command to run the main script
+CMD [ "lambda_function.lambda_handler" ]
